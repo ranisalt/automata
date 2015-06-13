@@ -121,29 +121,29 @@ TEST_F(FiniteStateAutomaton_test, insertTransition)
 
 	FSM::TransitionMap map;
 
-	EXPECT_NO_THROW(fsm.insertTransition({"q0", 'a'}, "q1"));
-	map.emplace(std::make_pair(std::make_pair("q0", 'a'), "q1"));
+	EXPECT_NO_THROW(fsm.insertTransition(std::make_tuple("q0", 'a'), "q1"));
+	map.emplace(std::make_tuple("q0", 'a'), "q1");
 	EXPECT_EQ(map, fsm.transitions());
 
-	EXPECT_NO_THROW(fsm.insertTransition({{"q1", 'b'}, "q0"}));
-	map.emplace(std::make_pair(std::make_pair("q1", 'b'), "q0"));
+	EXPECT_NO_THROW(fsm.insertTransition({std::make_tuple("q1", 'b'), "q0"}));
+	map.emplace(std::make_tuple("q1", 'b'), "q0");
 	EXPECT_EQ(map, fsm.transitions());
 }
 
 TEST_F(FiniteStateAutomaton_test, insertInvalidTransition)
 {
 	// machine is empty
-	EXPECT_THROW(fsm.insertTransition({"q0", 'a'}, "q1"), FSM::invalid_state);
+	EXPECT_THROW(fsm.insertTransition(std::make_tuple("q0", 'a'), "q1"), FSM::invalid_state);
 	EXPECT_EQ(0, fsm.transitions().size());
 
 	// "q0" exists, but 'a' is not a valid symbol
 	fsm.insertState("q0");
-	EXPECT_THROW(fsm.insertTransition({"q0", 'a'}, "q1"), FSM::invalid_symbol);
+	EXPECT_THROW(fsm.insertTransition(std::make_tuple("q0", 'a'), "q1"), FSM::invalid_symbol);
 	EXPECT_EQ(0, fsm.transitions().size());
 
 	// "q0" and 'a' exists, but "q1" is not a valid state
 	fsm.insertSymbol('a');
-	EXPECT_THROW(fsm.insertTransition({"q0", 'a'}, "q1"), FSM::invalid_state);
+	EXPECT_THROW(fsm.insertTransition(std::make_tuple("q0", 'a'), "q1"), FSM::invalid_state);
 	EXPECT_EQ(0, fsm.transitions().size());
 }
 
@@ -169,12 +169,12 @@ TEST_F(FiniteStateAutomaton_test, acceptAndReject)
 	fsm.insertSymbol({'a', 'b'});
 	fsm.insertState({"q0", "q1", "q2"});
 	fsm.initialState("q0");
-	fsm.insertTransition({"q0", 'a'}, "q1");
-	fsm.insertTransition({"q0", 'b'}, "q2");
-	fsm.insertTransition({"q1", 'a'}, "q1");
-	fsm.insertTransition({"q1", 'b'}, "q2");
-	fsm.insertTransition({"q2", 'a'}, "q1");
-	fsm.insertTransition({"q2", 'b'}, "q2");
+	fsm.insertTransition(std::make_tuple("q0", 'a'), "q1");
+	fsm.insertTransition(std::make_tuple("q0", 'b'), "q2");
+	fsm.insertTransition(std::make_tuple("q1", 'a'), "q1");
+	fsm.insertTransition(std::make_tuple("q1", 'b'), "q2");
+	fsm.insertTransition(std::make_tuple("q2", 'a'), "q1");
+	fsm.insertTransition(std::make_tuple("q2", 'b'), "q2");
 	fsm.insertFinalState("q2");
 
 	EXPECT_TRUE(fsm.accept({'a', 'a', 'b'}));

@@ -70,17 +70,17 @@ void FiniteStateAutomaton<_Symbol, _State>::initialState(const State& state)
 template<typename _Symbol, typename _State>
 void FiniteStateAutomaton<_Symbol, _State>::insertTransition(const Transition& transition)
 {
-	std::pair<State, Symbol> input = transition.first;
-	State output = transition.second;
+	Input input = std::get<0>(transition);
+	State output = std::get<1>(transition);
 
 	// ensure input state is valid
-	if (_states.find(input.first) == _states.cend()) {
-		throw invalid_state(input.first);
+	if (_states.find(std::get<0>(input)) == _states.cend()) {
+		throw invalid_state(std::get<0>(input));
 	}
 
 	// ensure input symbol is valid
-	if (_input_alphabet.find(input.second) == _input_alphabet.cend()) {
-		throw invalid_symbol(input.second);
+	if (_input_alphabet.find(std::get<1>(input)) == _input_alphabet.cend()) {
+		throw invalid_symbol(std::get<1>(input));
 	}
 
 	// ensure output state is valid

@@ -6,27 +6,16 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include "tools.h"
 
 template<typename _Symbol = char, typename _State = std::string>
 class FiniteStateAutomaton {
-	// Specialized hash function for pairs, needed for maps and sets. From Boost library.
-	template<typename T1, typename T2>
-	struct PairHash {
-		size_t operator()(const std::pair<T1, T2>& pair) const
-		{
-			size_t seed = 0;
-			seed ^= std::hash<T1>()(pair.first) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			seed ^= std::hash<T2>()(pair.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-			return seed;
-		}
-	};
-
 public:
 	using Symbol = _Symbol;
 	using State = _State;
 	using Alphabet = std::unordered_set<Symbol>;
-	using Input = std::pair<State, Symbol>;
-	using TransitionMap = std::unordered_map<Input, State, PairHash<State, Symbol>>;
+	using Input = std::tuple<State, Symbol>;
+	using TransitionMap = std::unordered_map<Input, State>;
 	using Transition = typename TransitionMap::value_type;
 	using StateSet = std::unordered_set<State>;
 
