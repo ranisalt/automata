@@ -1,5 +1,6 @@
 #include <array>
 #include <gtest/gtest.h>
+#include "exceptions.h"
 #include "finitestateautomaton.h"
 
 class FiniteStateAutomaton_test : public testing::Test {

@@ -1,7 +1,6 @@
 #ifndef AUTOMATA_FINITESTATEAUTOMATON_H
 #define AUTOMATA_FINITESTATEAUTOMATON_H
 
-#include <exception>
 #include <forward_list>
 #include <string>
 #include <unordered_map>
@@ -18,40 +17,8 @@ public:
 	using TransitionMap = std::unordered_map<Input, State>;
 	using Transition = typename TransitionMap::value_type;
 	using StateSet = std::unordered_set<State>;
-
-	// Exception for invalid symbol usage
-	class invalid_symbol : public std::invalid_argument {
-	public:
-		invalid_symbol(const Symbol& symbol) : std::invalid_argument("Invalid symbol"), _symbol(symbol)
-		{ }
-
-		virtual const char* what() const throw()
-		{
-			std::ostringstream oss;
-			oss << std::invalid_argument::what() << ": " << _symbol;
-			return oss.str().c_str();
-		}
-
-	private:
-		Symbol _symbol;
-	};
-
-	// Exception for invalid state usage
-	class invalid_state : public std::invalid_argument {
-	public:
-		invalid_state(const State& state) : std::invalid_argument("Invalid state"), _state(state)
-		{ }
-
-		virtual const char* what() const throw()
-		{
-			std::ostringstream oss;
-			oss << std::invalid_argument::what() << ": " << _state;
-			return oss.str().c_str();
-		}
-
-	private:
-		State _state;
-	};
+	using invalid_symbol = exceptions::invalid_symbol<Symbol>;
+	using invalid_state = exceptions::invalid_state<State>;
 
 	// Initialize empty automaton
 	// TODO: rethink, since it makes the machine get to an invalid state (no data at all)
