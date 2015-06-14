@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include "exceptions.h"
 #include "tools.h"
 
 template<typename _Symbol = char, typename _State = std::string>

@@ -2,6 +2,7 @@
 #define AUTOMATA_EXCEPTIONS_H
 
 #include <exception>
+#include <sstream>
 
 namespace exceptions {
 
