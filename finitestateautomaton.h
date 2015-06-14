@@ -74,7 +74,7 @@ public:
 	TransitionMap transitions() const
 	{ return _transitions; }
 
-	void insertTransition(const Input& input, const State output)
+	void insertTransition(const Input& input, const State& output)
 	{ insertTransition(std::make_pair(input, output)); }
 
 	void insertTransition(const Transition& transition);
