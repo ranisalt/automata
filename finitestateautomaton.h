@@ -1,6 +1,7 @@
 #ifndef AUTOMATA_FINITESTATEAUTOMATON_H
 #define AUTOMATA_FINITESTATEAUTOMATON_H
 
+#include <algorithm>
 #include <experimental/optional>
 #include <sstream>
 #include <string>
@@ -114,6 +115,9 @@ public:
 	{ return accept(ilist.begin(), ilist.end()); }
 
 private:
+	template<typename InputIt>
+	bool internalAccept(const State& current_state, const InputIt& first, const InputIt& last) const;
+
 	// Automaton configuration
 	Alphabet _input_alphabet;
 	StateSet _states;
@@ -253,19 +257,28 @@ template<typename _Symbol, typename _State>
 template<typename InputIt>
 bool FiniteStateAutomaton<_Symbol, _State>::accept(const InputIt& first, const InputIt& last)
 {
-	auto current_state = _initial_state;
-
-	for (auto it = first; it != last; ++it) {
-		auto position = _transitions.find(std::make_pair(current_state, *it));
-		if (position == _transitions.cend()) {
-			return false;
-		}
-
-		current_state = position->second;
-	}
-
-	auto position = _final_states.find(current_state);
-	return position != _final_states.cend();
+	return internalAccept(_initial_state, first, last);
 }
+
+template<typename _Symbol, typename _State>
+template<typename InputIt>
+bool FiniteStateAutomaton<_Symbol, _State>::internalAccept(const State& current_state, const InputIt& first, const InputIt& last) const
+{
+    if (first == last) {
+	    return _final_states.find(current_state) != _final_states.cend();
+    }
+
+    auto range = _transitions.equal_range(std::make_pair(current_state, *first));
+    if (range.first == range.second) {
+	    return false;
+    }
+
+    for (auto it = range.first; it != range.second; ++it) {
+	    if (internalAccept(it->second, std::next(first), last)) {
+		    return true;
+	    }
+    }
+    return false;
+};
 
 #endif //AUTOMATA_FINITESTATEAUTOMATON_H
