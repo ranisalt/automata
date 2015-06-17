@@ -1,4 +1,5 @@
 #include <array>
+#include <experimental/optional>
 #include <gtest/gtest.h>
 #include "exceptions.h"
 #include "finitestateautomaton.h"
@@ -117,17 +118,17 @@ TEST_F(FiniteStateAutomaton_test, setInitialState)
 
 TEST_F(FiniteStateAutomaton_test, insertTransition)
 {
-	fsm.insertSymbol({'a', 'b'});
+	fsm.insertSymbol({'a'});
 	fsm.insertState({"q0", "q1"});
 
 	FSM::TransitionMap map;
 
 	EXPECT_NO_THROW(fsm.insertTransition(std::make_tuple("q0", 'a'), "q1"));
-	map.emplace(std::make_tuple("q0", 'a'), "q1");
+	map.emplace(FSM::Input("q0", 'a'), "q1");
 	EXPECT_EQ(map, fsm.transitions());
 
-	EXPECT_NO_THROW(fsm.insertTransition({std::make_tuple("q1", 'b'), "q0"}));
-	map.emplace(std::make_tuple("q1", 'b'), "q0");
+	EXPECT_NO_THROW(fsm.insertTransition({std::make_tuple("q1", std::experimental::nullopt), "q0"}));
+	map.emplace(FSM::Input("q1", std::experimental::nullopt), "q0");
 	EXPECT_EQ(map, fsm.transitions());
 }
 

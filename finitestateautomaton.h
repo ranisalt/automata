@@ -1,7 +1,8 @@
 #ifndef AUTOMATA_FINITESTATEAUTOMATON_H
 #define AUTOMATA_FINITESTATEAUTOMATON_H
 
-#include <forward_list>
+#include <experimental/optional>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -10,12 +11,30 @@
 
 template<typename _Symbol = char, typename _State = std::string>
 class FiniteStateAutomaton {
+
+
 public:
 	using Symbol = _Symbol;
 	using State = _State;
 	using Alphabet = std::unordered_set<Symbol>;
-	using Input = std::tuple<State, Symbol>;
-	using TransitionMap = std::unordered_map<Input, State>;
+	using Input = std::tuple<State, std::experimental::optional<Symbol>>;
+	struct KeyEqual {
+		bool operator()(const Input& lhs, const Input& rhs) const
+		{
+			if (std::get<0>(lhs) != std::get<0>(rhs)) {
+				return false;
+			}
+
+			auto lval = std::get<1>(lhs), rval = std::get<1>(rhs);
+			if (lval && rval && lval.value() != rval.value()) {
+				return false;
+			}
+
+			return true;
+		}
+	};
+
+	using TransitionMap = std::unordered_multimap<Input, State, std::hash<Input>, KeyEqual>;
 	using Transition = typename TransitionMap::value_type;
 	using StateSet = std::unordered_set<State>;
 	using invalid_symbol = exceptions::invalid_symbol<Symbol>;
@@ -182,8 +201,12 @@ void FiniteStateAutomaton<_Symbol, _State>::insertTransition(const Transition& t
 	}
 
 	// ensure input symbol is valid
-	if (_input_alphabet.find(std::get<1>(input)) == _input_alphabet.cend()) {
-		throw invalid_symbol(std::get<1>(input));
+	auto symbol = std::get<1>(input);
+	if (symbol) {
+		auto val = symbol.value();
+		if (_input_alphabet.find(val) == _input_alphabet.cend()) {
+			throw invalid_symbol(val);
+		}
 	}
 
 	// ensure output state is valid
