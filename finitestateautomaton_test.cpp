@@ -179,6 +179,6 @@ TEST_F(FiniteStateAutomaton_test, acceptAndReject)
 	fsm.insertTransition(std::make_tuple("q2", 'b'), "q2");
 	fsm.insertFinalState("q2");
 
-	EXPECT_TRUE(fsm.accept({'a', 'a', 'b'}));
-	EXPECT_FALSE(fsm.accept({'b', 'a', 'a'}));
+	EXPECT_TRUE(fsm.accept(std::string{'a', 'a', 'b'}));
+	EXPECT_FALSE(fsm.accept(std::string{'b', 'a', 'a'}));
 }

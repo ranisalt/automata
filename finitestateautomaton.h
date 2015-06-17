@@ -1,7 +1,6 @@
 #ifndef AUTOMATA_FINITESTATEAUTOMATON_H
 #define AUTOMATA_FINITESTATEAUTOMATON_H
 
-#include <algorithm>
 #include <experimental/optional>
 #include <sstream>
 #include <string>
@@ -12,13 +11,12 @@
 
 template<typename _Symbol = char, typename _State = std::string>
 class FiniteStateAutomaton {
-
-
 public:
 	using Symbol = _Symbol;
 	using State = _State;
 	using Alphabet = std::unordered_set<Symbol>;
 	using Input = std::tuple<State, std::experimental::optional<Symbol>>;
+
 	struct KeyEqual {
 		bool operator()(const Input& lhs, const Input& rhs) const
 		{
@@ -30,9 +28,8 @@ public:
 			if (lval && rval && lval.value() != rval.value()) {
 				return false;
 			}
-
 			return true;
-		}
+		};
 	};
 
 	using TransitionMap = std::unordered_multimap<Input, State, std::hash<Input>, KeyEqual>;
@@ -108,11 +105,9 @@ public:
 
 	void removeFinalState(const State& state);
 
-	template<typename InputIt>
-	bool accept(const InputIt& first, const InputIt& last);
-
-	bool accept(std::initializer_list<Symbol> ilist)
-	{ return accept(ilist.begin(), ilist.end()); }
+	template<typename Container>
+	bool accept(const Container& sentence) const
+	{ return internalAccept(_initial_state, sentence.cbegin(), sentence.cend()); }
 
 private:
 	template<typename InputIt>
@@ -255,30 +250,24 @@ void FiniteStateAutomaton<_Symbol, _State>::removeFinalState(const State& state)
 
 template<typename _Symbol, typename _State>
 template<typename InputIt>
-bool FiniteStateAutomaton<_Symbol, _State>::accept(const InputIt& first, const InputIt& last)
+bool FiniteStateAutomaton<_Symbol, _State>::internalAccept(const State& current_state, const InputIt& first,
+	const InputIt& last) const
 {
-	return internalAccept(_initial_state, first, last);
-}
+	if (first == last) {
+		return _final_states.find(current_state) != _final_states.cend();
+	}
 
-template<typename _Symbol, typename _State>
-template<typename InputIt>
-bool FiniteStateAutomaton<_Symbol, _State>::internalAccept(const State& current_state, const InputIt& first, const InputIt& last) const
-{
-    if (first == last) {
-	    return _final_states.find(current_state) != _final_states.cend();
-    }
+	auto range = _transitions.equal_range(std::make_pair(current_state, *first));
+	if (range.first == range.second) {
+		return false;
+	}
 
-    auto range = _transitions.equal_range(std::make_pair(current_state, *first));
-    if (range.first == range.second) {
-	    return false;
-    }
-
-    for (auto it = range.first; it != range.second; ++it) {
-	    if (internalAccept(it->second, std::next(first), last)) {
-		    return true;
-	    }
-    }
-    return false;
+	for (auto it = range.first; it != range.second; ++it) {
+		if (internalAccept(it->second, std::next(first), last)) {
+			return true;
+		}
+	}
+	return false;
 };
 
 #endif //AUTOMATA_FINITESTATEAUTOMATON_H
