@@ -1,3 +1,4 @@
+#include <deque>
 #include <gtest/gtest.h>
 #include "exceptions.h"
 #include "pushdownautomaton.h"
@@ -167,41 +168,41 @@ TEST_F(PushdownAutomaton_test, insertTransition)
 
 	PDM::TransitionMap map;
 
-	EXPECT_NO_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')));
-	map.emplace(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&'));
+	EXPECT_NO_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})));
+	map.emplace(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'}));
 	EXPECT_EQ(map, pdm.transitions());
 
-	EXPECT_NO_THROW(pdm.insertTransition({std::make_tuple("q1", pdm.epsilon(), '&'), std::make_tuple("q0", '$')}));
-	map.emplace(std::make_tuple("q1", pdm.epsilon(), '&'), std::make_tuple("q0", '$'));
+	EXPECT_NO_THROW(pdm.insertTransition({std::make_tuple("q1", pdm.epsilon, '&'), std::make_tuple("q0", std::deque<char>{'$'})}));
+	map.emplace(std::make_tuple("q1", pdm.epsilon, '&'), std::make_tuple("q0", std::deque<char>{'$'}));
 	EXPECT_EQ(map, pdm.transitions());
 }
 
 TEST_F(PushdownAutomaton_test, insertInvalidTransition)
 {
 	// machine is empty
-	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')), PDM::invalid_state);
+	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})), PDM::invalid_state);
 	EXPECT_EQ(0, pdm.transitions().size());
 
 	// "q0" exists, but 'a' is not a valid symbol
 	pdm.insertState("q0");
-	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')),
+	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})),
 		PDM::invalid_symbol);
 	EXPECT_EQ(0, pdm.transitions().size());
 
 	// "q0" and 'a' exists, but '$' is not a valid stack symbol
 	pdm.insertSymbol('a');
-	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')),
+	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})),
 		PDM::invalid_symbol);
 	EXPECT_EQ(0, pdm.transitions().size());
 
 	// "q0", 'a' and '$' exists, but "q1" is not a valid state
 	pdm.insertStackSymbol('$');
-	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')), PDM::invalid_state);
+	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})), PDM::invalid_state);
 	EXPECT_EQ(0, pdm.transitions().size());
 
 	// "q0", 'a', '$' and "q1" exists, but '&' is not a valid stack symbol
 	pdm.insertState("q1");
-	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", '&')),
+	EXPECT_THROW(pdm.insertTransition(std::make_tuple("q0", 'a', '$'), std::make_tuple("q1", std::deque<char>{'&'})),
 		PDM::invalid_symbol);
 	EXPECT_EQ(0, pdm.transitions().size());
 }
@@ -240,13 +241,13 @@ TEST_F(PushdownAutomaton_test, acceptAndReject)
 	pdm.insertStackSymbol({'a', 'b', '$'});
 	pdm.insertState({"q0", "q1", "q2", "q3"});
 	pdm.initialState("q0");
-	pdm.insertTransition(std::make_tuple("q0", pdm.epsilon(), pdm.epsilon()), std::make_tuple("q1", '$'));
-	pdm.insertTransition(std::make_tuple("q1", 'a', pdm.epsilon()), std::make_tuple("q1", 'a'));
-	pdm.insertTransition(std::make_tuple("q1", 'b', 'a'), std::make_tuple("q2", pdm.epsilon()));
-	pdm.insertTransition(std::make_tuple("q2", 'b', 'a'), std::make_tuple("q2", pdm.epsilon()));
-	pdm.insertTransition(std::make_tuple("q2", 'b', '$'), std::make_tuple("q3", pdm.epsilon()));
+	pdm.insertTransition(std::make_tuple("q0", pdm.epsilon, pdm.epsilon), std::make_tuple("q1", std::deque<char>{'$'}));
+	pdm.insertTransition(std::make_tuple("q1", 'a', pdm.epsilon), std::make_tuple("q1", std::deque<char>{'a'}));
+	pdm.insertTransition(std::make_tuple("q1", 'b', 'a'), std::make_tuple("q2", std::deque<char>{}));
+	pdm.insertTransition(std::make_tuple("q2", 'b', 'a'), std::make_tuple("q2", std::deque<char>{}));
+	pdm.insertTransition(std::make_tuple("q2", 'b', '$'), std::make_tuple("q3", std::deque<char>{}));
 	pdm.insertFinalState("q3");
 
-	EXPECT_TRUE(pdm.accept({'a', 'a', 'b', 'b'}));
-	EXPECT_FALSE(pdm.accept({'a', 'a', 'b'}));
+	EXPECT_TRUE(pdm.accept(std::string{'a', 'a', 'b', 'b'}).first);
+	EXPECT_FALSE(pdm.accept(std::string{'a', 'a', 'b'}).first);
 }
